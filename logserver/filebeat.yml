@@ -1,0 +1,21 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/rsyslog/web/nginx_access.log
+  fields:
+    service: nginx_access
+    fields_under_root: true
+    scan_frequency: 2s
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/rsyslog/web/nginx_error.log
+  fields:
+    service: nginx_error
+    fields_under_root: true
+    scan_frequency: 2s
+
+output.logstash:
+  hosts: ["{{ELKSERVER_IP"}}:5044"]

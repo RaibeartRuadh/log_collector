@@ -1,0 +1,117 @@
+---
+- hosts: elkserver
+  become: true
+  vars:
+    ELKSERVER_IP: 192.168.10.12
+
+  tasks:    
+    - name: Установка временной зоны MSK
+      timezone:
+        name: Europe/Moscow
+
+    - name: Устанавливаем epel-репозиторий
+      yum:
+        name: epel-release
+        state: present
+      tags:
+        - epel-package
+        - packages
+
+    - name: Устанавливаем elasticsearch-репозиторий
+      copy:
+        src: elasticsearch.repo
+        dest: /etc/yum.repos.d/
+    
+    - name: Устанавливаем необходимые и вспомогательные пакеты через yum
+      yum:
+        name: "{{item}}"
+        state: present
+      loop:
+        - mc
+        - nano
+        - net-tools
+        - yum-utils
+        - audispd-plugins
+        - java-1.8.0
+        - elasticsearch
+        - logstash
+        - kibana
+
+    - name: Start elasticsearch
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: yes
+
+    - name: Start logstash
+      systemd:
+        name: logstash
+        state: started
+        enabled: yes
+
+    - name: Start kibana
+    systemd:
+        state: started
+    enabled: yes
+        loop:
+        - elasticsearch
+        - logstash
+        - kibana
+
+    - name: Copy elasticsearch configs
+      copy:
+        src: '{{ item }}'
+        dest: /etc/elasticsearch/
+        owner: root
+        group: elasticsearch
+        mode: '0660'
+      loop:
+        - elasticsearch.yml
+        - jvm.options
+      notify:
+        - restart elasticsearch
+
+    - name: Change ownership for logstash directory
+      file:
+        path: '{{ item }}'
+        state: directory
+        recurse: yes
+        owner: logstash
+        group: logstash
+      loop:
+        - /var/lib/logstash/
+        - /var/log/logstash/
+
+    - name: Copy logstash configs
+      copy:
+        src: '{{ item }}'
+        dest: /etc/logstash/conf.d/
+      loop:
+        - 02-beats-input.conf
+        - 10-nginx-filter.conf
+        - 20-output.conf
+      notify:
+         - restart logstash
+
+    - name: Copy Kibana config
+      copy:
+        src: kibana.yml
+        dest: /etc/kibana/
+      notify:
+        - restart kibana
+
+  handlers:
+    - name: restart elasticsearch
+      systemd:
+        name: elasticsearch
+        state: restarted
+    - name: restart logstash
+      systemd:
+        name: logstash
+        state: restarted
+    - name: restart kibana
+      systemd:
+        name: kibana
+        state: restarted
+
+
