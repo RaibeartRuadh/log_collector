@@ -37,28 +37,25 @@
         - logstash
         - kibana
 
-    - name: Start elasticsearch
+    - name: Стартуем elasticsearch
       systemd:
         name: elasticsearch
         state: started
         enabled: yes
 
-    - name: Start logstash
+    - name: Стартуем logstash
       systemd:
         name: logstash
         state: started
         enabled: yes
 
-    - name: Start kibana
-    systemd:
+    - name: Стартуем kibana
+      systemd:
+        name: kibana
         state: started
-    enabled: yes
-        loop:
-        - elasticsearch
-        - logstash
-        - kibana
+        enabled: yes
 
-    - name: Copy elasticsearch configs
+    - name: Копируем конфигурацию elasticsearch
       copy:
         src: '{{ item }}'
         dest: /etc/elasticsearch/
@@ -71,7 +68,7 @@
       notify:
         - restart elasticsearch
 
-    - name: Change ownership for logstash directory
+    - name: Меняем права на директорию logstash
       file:
         path: '{{ item }}'
         state: directory
@@ -82,7 +79,7 @@
         - /var/lib/logstash/
         - /var/log/logstash/
 
-    - name: Copy logstash configs
+    - name: Копируем конфигурацию logstash
       copy:
         src: '{{ item }}'
         dest: /etc/logstash/conf.d/
@@ -93,7 +90,7 @@
       notify:
          - restart logstash
 
-    - name: Copy Kibana config
+    - name: Копируем конфигурацию Kibana
       copy:
         src: kibana.yml
         dest: /etc/kibana/
