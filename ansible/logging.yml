@@ -1,14 +1,14 @@
 - hosts: webserver
   become: true
   roles:
-    - web
+    - webserver
 
 - hosts: logserver
   become: true
   roles:
-    - log
+    - logserver
 
 - hosts: elkserver
   become: true
   roles:
-    - elk
+    - elkserver

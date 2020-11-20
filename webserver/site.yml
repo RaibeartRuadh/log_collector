@@ -19,7 +19,7 @@
         - packages
 
     - name: Устанавливаем необходимые и вспомогательные пакеты через yum
-      become: true
+      become: true   
       yum:
         name: "{{item}}"
         state: present
@@ -29,6 +29,7 @@
         - net-tools
         - yum-utils
         - nginx
+        - audispd-plugins
 
     - name: Создаем конфигурацию nginx используя шаблон jinja2
       template:
@@ -38,21 +39,21 @@
       tags:
         - nginx-configuration
    
-    - name: Check NGINX configs
+    - name: Проверяем конфиг nginx
       shell: "/usr/sbin/nginx -t"
       register: nginx_config_status 
 
-    - name: NGINX test status
-      debug:
-        msg: "{{ nginx_config_status }}"
-
-    - name: Start and enable nginx
+    - name: Запускаем nginx
       systemd:
         name: nginx
         state: started
         enabled: yes
 
-    - name: Add audit rules for nginx config files
+    - name: Проверяем статус nginx
+      debug:
+        msg: "{{ nginx_config_status }}"
+
+    - name: Добавляем правила аудита в конфиг nginx
       blockinfile:
         path: /etc/audit/rules.d/audit.rules
         block: |
@@ -62,25 +63,20 @@
       notify:
         - restart auditd
 
-    - name: Install audispd-plugins
-      yum:
-        name: audispd-plugins
-        state: present
-
-    - name: Copy audispd config files
+    - name: Копируем конфиг.файлы audispd
       copy:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       with_items:
-        - {src: 'audispd-remote.conf',dest: '/etc/audisp/audisp-remote.conf'}
-        - {src: 'au-remote.conf',dest: '/etc/audisp/plugins.d/au-remote.conf'}
         - {src: 'auditd.conf',dest: '/etc/audit/auditd.conf'}
+        - {src: 'audispd-remote.j2',dest: '/etc/audisp/audisp-remote.conf'}
+        - {src: 'au-remote.conf',dest: '/etc/audisp/plugins.d/au-remote.conf'}
       notify:
         - restart auditd
 
-    - name: Copy rsyslog config
+    - name: Копируем конфиг rsyslog
       copy:
-        src: rsyslog.conf
+        src: rsyslog.j2
         dest: /etc/rsyslog.conf
       notify:
         - restart rsyslog
