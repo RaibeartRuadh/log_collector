@@ -44,7 +44,7 @@
       notify:
         - restart auditd
 
-    - name: Добавляем репозиторий elasticsearch
+    - name: Добавляем репозиторий elasticsearch чтобы поставить filebeat
       copy:
         src: elasticsearch.repo
         dest: /etc/yum.repos.d/
@@ -62,7 +62,7 @@
 
     - name: Копируем конфиг filebeat
       copy:
-        src: filebeat.yml
+        src: filebeat.j2
         dest: /etc/filebeat/filebeat.yml
       notify:
         - restart filebeat

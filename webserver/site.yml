@@ -2,7 +2,7 @@
 - hosts: webserver
   become: true
   vars:
-    nginx_listen_port: 8080
+    nginx_listen_port: 80
     LOGSERVER_IP: 192.168.10.11
 
   tasks:    
@@ -38,6 +38,23 @@
         validate: /usr/sbin/nginx -t -c %s
       tags:
         - nginx-configuration
+        
+    - name: Делаем директорию под страничку сайта
+      become: true
+      file:
+        path: /opt/www
+        state: directory
+        owner: root
+        mode: 0777
+        
+    - name: копируем страничку index.html на место
+      copy:
+        src: index.html
+        dest: /opt/www/index.html
+        owner: root
+        group: root
+        mode: '0777'
+      notify: reload nginx
    
     - name: Проверяем конфиг nginx
       shell: "/usr/sbin/nginx -t"
@@ -53,7 +70,7 @@
       debug:
         msg: "{{ nginx_config_status }}"
 
-    - name: Добавляем правила аудита в конфиг nginx
+    - name: Добавляем правила аудита nginx
       blockinfile:
         path: /etc/audit/rules.d/audit.rules
         block: |
