@@ -5,11 +5,11 @@
     ELKSERVER_IP: 192.168.10.12
 
   tasks:    
-    - name: Установка временной зоны MSK
+    - name: Set timezone
       timezone:
         name: Europe/Moscow
 
-    - name: Устанавливаем epel-репозиторий
+    - name: Install repel repo
       yum:
         name: epel-release
         state: present
@@ -17,12 +17,12 @@
         - epel-package
         - packages
 
-    - name: Устанавливаем elasticsearch-репозиторий
+    - name: Install elasticsearch repo
       copy:
         src: elasticsearch.repo
         dest: /etc/yum.repos.d/
     
-    - name: Устанавливаем необходимые и вспомогательные пакеты через yum
+    - name: Install packages via yum
       yum:
         name: "{{item}}"
         state: present
@@ -37,25 +37,25 @@
         - logstash
         - kibana
 
-    - name: Стартуем elasticsearch
+    - name: Start elasticsearch
       systemd:
         name: elasticsearch
         state: started
         enabled: yes
 
-    - name: Стартуем logstash
+    - name: Start logstash
       systemd:
         name: logstash
         state: started
         enabled: yes
 
-    - name: Стартуем kibana
+    - name: Start kibana
       systemd:
         name: kibana
         state: started
         enabled: yes
 
-    - name: Копируем конфигурацию elasticsearch
+    - name: copy elasticsearch config
       copy:
         src: '{{ item }}'
         dest: /etc/elasticsearch/
@@ -68,7 +68,7 @@
       notify:
         - restart elasticsearch
 
-    - name: Меняем права на директорию logstash
+    - name: change folder owner logstash
       file:
         path: '{{ item }}'
         state: directory
@@ -79,7 +79,7 @@
         - /var/lib/logstash/
         - /var/log/logstash/
 
-    - name: Копируем конфигурацию logstash
+    - name: Copy logstash config
       copy:
         src: '{{ item }}'
         dest: /etc/logstash/conf.d/
@@ -90,7 +90,7 @@
       notify:
          - restart logstash
 
-    - name: Копируем конфигурацию Kibana
+    - name: Copy Kibana config
       copy:
         src: kibana.yml
         dest: /etc/kibana/

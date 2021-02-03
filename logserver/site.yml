@@ -5,11 +5,11 @@
     ELKSERVER_IP: 192.168.10.12
 
   tasks:    
-    - name: Установка временной зоны MSK
+    - name: Set timezone
       timezone:
         name: Europe/Moscow
 
-    - name: Устанавливаем epel-репозиторий
+    - name: Install epel repo
       yum:
         name: epel-release
         state: present
@@ -17,7 +17,7 @@
         - epel-package
         - packages
 
-    - name: Устанавливаем необходимые и вспомогательные пакеты через yum
+    - name: Install packages via yum
       become: true
       yum:
         name: "{{item}}"
@@ -30,37 +30,37 @@
         - audispd-plugins
         - java-1.8.0
 
-    - name: Копируем конфиг rsyslog
+    - name: Copy rsyslog config
       copy:
         src: rsyslog.conf
         dest: /etc/rsyslog.conf
       notify:
         - restart rsyslog
 
-    - name: Копируем конфиг auditd
+    - name: Copy auditd config
       copy:
         src: auditd.conf
         dest: /etc/audit/auditd.conf
       notify:
         - restart auditd
 
-    - name: Добавляем репозиторий elasticsearch чтобы поставить filebeat
+    - name: Install elasticsearch repo for filebeat installation
       copy:
         src: elasticsearch.repo
         dest: /etc/yum.repos.d/
 
-    - name: Устанавливаем filebeat
+    - name: Install filebeat
       yum:
         name: filebeat
         state: present
 
-    - name: Запускаем filebeat
+    - name: Start filebeat
       systemd:
         name: filebeat
         state: started
         enabled: yes
 
-    - name: Копируем конфиг filebeat
+    - name: Copy filebeat custom config
       copy:
         src: filebeat.j2
         dest: /etc/filebeat/filebeat.yml
