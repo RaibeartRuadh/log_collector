@@ -198,7 +198,7 @@ ELK подразумевает установку 3-х продуктов:  Elas
 чтобы у нас появились данные в логах.
 - зайти на webserver и проверить, что логи nginx не сохраняются в /var/log/nginx кроме критических.
 - зайти на logserver и убедиться, что логи nginx с webserver попали в /var/log/rsyslog/web/nginx_access.log и  /var/log/rsyslog/web/nginx_error.log соответственно
-- Открыть dashboard kibanа (elkserver) на 192.168.10.12:5601 на вкладке Discover, создайте новый индекс шаблон nginx-*. и снова перейти на Discover 
+- Открыть dashboard kibanа (elkserver) на http://192.168.10.12:5601 на вкладке Discover, создайте новый индекс шаблон nginx-*. и снова перейти на Discover 
 ![Иллюстрация к проекту](screenshots/elk1.png)
 ![Иллюстрация к проекту](screenshots/elk2.png)
 ![Иллюстрация к проекту](screenshots/elk3.png)
